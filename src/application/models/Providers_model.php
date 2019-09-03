@@ -88,7 +88,21 @@ class Providers_Model extends CI_Model {
      */
     public function exists($provider)
     {
-	return false;
+        if ( ! isset($provider['email']))
+        {
+            throw new Exception('Provider email is not provided:' . print_r($provider, TRUE));
+        }
+
+        // This method shouldn't depend on another method of this class.
+        $num_rows = $this->db
+            ->select('*')
+            ->from('ea_users')
+            ->join('ea_roles', 'ea_roles.id = ea_users.id_roles', 'inner')
+            ->where('ea_users.email', $provider['email'])
+            ->where('ea_roles.slug', DB_SLUG_PROVIDER)
+            ->get()->num_rows();
+
+        return ($num_rows > 0) ? TRUE : FALSE;
     }
 
     /**
